@@ -888,13 +888,13 @@ tabPad.PaddingTop = UDim.new(0, 3); tabPad.PaddingBottom = UDim.new(0, 3)
 
 local function makeTab(name, order)
     local btn = Instance.new("TextButton", tabBar)
-    btn.Size = UDim2.fromOffset(getMobileOptimized(68, 68), getMobileOptimized(34, 30))
+    btn.Size = UDim2.fromOffset(getMobileOptimized(58, 56), getMobileOptimized(34, 30))
     btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     btn.BackgroundTransparency = 0.45
     btn.BorderSizePixel = 0
     btn.Text = name
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = getMobileOptimized(13, 12)
+    btn.TextSize = getMobileOptimized(12, 11)
     btn.TextColor3 = Color3.fromRGB(220, 220, 230)
     btn.AutoButtonColor = false
     btn.LayoutOrder = order
@@ -1935,11 +1935,13 @@ makeTab("Speed",    1)
 makeTab("Combat",   2)
 makeTab("Visual",   3)
 makeTab("Settings", 4)
+makeTab("Control",  5)
 
 local pSpeed    = makePage("Speed")
 local pMovement = makePage("Combat")
 local pVisual   = makePage("Visual")
 local pSettings = makePage("Settings")
+local pControl  = makePage("Control")
 -- Steal controls now belong to Combat; no separate Steal page/tab exists.
 local pSteal = pMovement
 
@@ -1959,6 +1961,96 @@ for name, btn in pairs(tabButtons) do
 end
 
 switchTab("Speed")
+
+-- ================= CONTROL TAB (Keyboard + PlayStation / Controller) =================
+do
+    sectionHeader(pControl, "CONTROLLER SUPPORT", 1)
+
+    -- Enable controller input for keybinds / actions
+    if _G._WEALccControllerEnabled == nil then
+        _G._WEALccControllerEnabled = true
+    end
+    local sCtrl = TR(pControl, 2, "Enable Controller", "", nil, _G._WEALccControllerEnabled == true, function(on)
+        _G._WEALccControllerEnabled = on and true or false
+        if _G.KRIXSaveNow then pcall(_G.KRIXSaveNow) end
+    end)
+    VisualSetters.ControllerEnabled = sCtrl
+
+    -- Hint row
+    local hint = Instance.new("Frame", pControl)
+    hint.Size = UDim2.new(1, 0, 0, getMobileOptimized(48, 44))
+    hint.BackgroundColor3 = CARD
+    hint.BorderSizePixel = 0
+    hint.LayoutOrder = 3
+    hint.ZIndex = 4
+    Instance.new("UICorner", hint).CornerRadius = UDim.new(0, 10)
+    local hSt = Instance.new("UIStroke", hint)
+    hSt.Color = Color3.fromRGB(28, 28, 34)
+    hSt.Thickness = 1
+    local hLbl = Instance.new("TextLabel", hint)
+    hLbl.Size = UDim2.new(1, -20, 1, 0)
+    hLbl.Position = UDim2.new(0, 12, 0, 0)
+    hLbl.BackgroundTransparency = 1
+    hLbl.Text = "Click a bind → press Keyboard key or PS button (X/O/□/△/L1/R1...)"
+    hLbl.TextColor3 = DIM
+    hLbl.Font = Enum.Font.Gotham
+    hLbl.TextSize = getMobileOptimized(11, 10)
+    hLbl.TextXAlignment = Enum.TextXAlignment.Left
+    hLbl.TextWrapped = true
+    hLbl.ZIndex = 5
+
+    sectionHeader(pControl, "MOVEMENT BINDS", 10)
+    KR(pControl, 11, "Carry Mode", "SpeedToggle")
+    KR(pControl, 12, "Normal Speed", "NormalSpeed")
+    KR(pControl, 13, "Lagger Mode", "LaggerToggle")
+    KR(pControl, 14, "Lagger Speed", "LaggerSpeed")
+    KR(pControl, 15, "Infinite Jump", "InfiniteJump")
+
+    sectionHeader(pControl, "COMBAT BINDS", 20)
+    KR(pControl, 21, "Bat Aimbot", "AutoBat")
+    KR(pControl, 22, "Drop Brainrot", "DropBrainrot")
+    KR(pControl, 23, "Auto Left", "AutoLeft")
+    KR(pControl, 24, "Auto Right", "AutoRight")
+    KR(pControl, 25, "TP Down", "TPDown")
+    KR(pControl, 26, "Insta Reset", "InstaReset")
+
+    sectionHeader(pControl, "UI BINDS", 30)
+    KR(pControl, 31, "UI Toggle", "UIToggle")
+
+    -- Clear all keybinds button
+    local clearRow = Instance.new("Frame", pControl)
+    clearRow.Size = UDim2.new(1, 0, 0, getMobileOptimized(40, 36))
+    clearRow.BackgroundColor3 = CARD
+    clearRow.BorderSizePixel = 0
+    clearRow.LayoutOrder = 40
+    clearRow.ZIndex = 4
+    Instance.new("UICorner", clearRow).CornerRadius = UDim.new(0, 10)
+    local cSt = Instance.new("UIStroke", clearRow)
+    cSt.Color = Color3.fromRGB(28, 28, 34)
+    cSt.Thickness = 1
+    local clearBtn = Instance.new("TextButton", clearRow)
+    clearBtn.Size = UDim2.new(1, -16, 1, -10)
+    clearBtn.Position = UDim2.new(0, 8, 0, 5)
+    clearBtn.BackgroundColor3 = Color3.fromRGB(40, 18, 24)
+    clearBtn.BorderSizePixel = 0
+    clearBtn.Text = "CLEAR ALL BINDS"
+    clearBtn.TextColor3 = Color3.fromRGB(255, 160, 170)
+    clearBtn.Font = Enum.Font.GothamBold
+    clearBtn.TextSize = getMobileOptimized(12, 11)
+    clearBtn.AutoButtonColor = false
+    clearBtn.ZIndex = 5
+    Instance.new("UICorner", clearBtn).CornerRadius = UDim.new(0, 8)
+    clearBtn.MouseButton1Click:Connect(function()
+        for k, _ in pairs(Keybinds) do
+            Keybinds[k] = Enum.KeyCode.Unknown
+            if KB[k] and KB[k].Parent then
+                KB[k].Text = "None"
+            end
+        end
+        if _G.KRIXSaveNow then pcall(_G.KRIXSaveNow) end
+    end)
+end
+
 
 local nsb, csb, lsb, carryV, laggerV, modeSR, laggerSR
 
@@ -9401,8 +9493,13 @@ end
 UserInputService.InputBegan:Connect(function(i,g)
     if hubStale() then return end
     if g then return end
-    if i.UserInputType == Enum.UserInputType.Keyboard then hkb(i.KeyCode)
-    elseif _isGamepadInput(i) then hkb(i.KeyCode) end
+    if i.UserInputType == Enum.UserInputType.Keyboard then
+        hkb(i.KeyCode)
+    elseif _isGamepadInput(i) then
+        if _G._WEALccControllerEnabled ~= false then
+            hkb(i.KeyCode)
+        end
+    end
 end)
 
 
